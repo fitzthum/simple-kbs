@@ -237,7 +237,7 @@ pub async fn delete_policy(pid: u64) -> Result<()> {
     Ok(())
 }
 
-pub async fn get_secret_policy(sec: &str) -> Result<policy::Policy> {
+pub async fn get_secret_policy(sec: &str) -> Result<Option<policy::Policy>> {
     let dbpool = get_dbpool().await?;
 
     let query_str = "SELECT polid FROM secrets WHERE secret_id = ?";
@@ -247,9 +247,13 @@ pub async fn get_secret_policy(sec: &str) -> Result<policy::Policy> {
         .bind(sec)
         .fetch_one(&dbpool)
         .await?;
-    let pol = pol_row.try_get::<i64, _>(0)? as u64;
-    let secret_policy = get_policy(pol).await?;
-    Ok(secret_policy)
+
+    if let Ok(pol) = pol_row.try_get::<i64, _>(0) {
+        Ok(Some(get_policy(pol as u64).await?))
+    } else {
+        Ok(None)
+    }
+
 }
 
 pub async fn insert_keyset(ksetid: &str, kskeys: &[String], polid: Option<u32>) -> Result<()> {
@@ -295,7 +299,7 @@ pub async fn delete_keyset(ksetid: &str) -> Result<()> {
     Ok(())
 }
 
-pub async fn get_keyset_policy(keysetid: &str) -> Result<policy::Policy> {
+pub async fn get_keyset_policy(keysetid: &str) -> Result<Option<policy::Policy>> {
     let dbpool = get_dbpool().await?;
 
     let query_str = "SELECT polid FROM keysets WHERE keysetid = ?";
@@ -305,9 +309,14 @@ pub async fn get_keyset_policy(keysetid: &str) -> Result<policy::Policy> {
         .bind(keysetid)
         .fetch_one(&dbpool)
         .await?;
-    let pol = pol_row.try_get::<i64, _>(0)? as u64;
-    let secret_policy = get_policy(pol).await?;
-    Ok(secret_policy)
+    if let Ok(pol) = pol_row.try_get::<i64, _>(0) {
+        Ok(Some(get_policy(pol as u64).await?))
+    }
+    else {
+        Ok(None)
+
+    }
+
 }
 
 pub async fn get_keyset_ids(keysetid: &str) -> Result<Vec<String>> {

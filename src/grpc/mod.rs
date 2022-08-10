@@ -53,6 +53,7 @@ impl KeyBrokerService for KeyBroker {
         let (godh, launch_blob, session) = generate_launch_bundle(r.policy, r.certificate_chain)
             .map_err(|e| Status::internal(format!("Failed to generate launch bundle: {}", e)))?;
 
+        info!("Launch Bundle Generated");
         let launch_id = Ok(Uuid::new_v4()).unwrap();
         SESSIONS.lock().unwrap().insert(launch_id, session);
 
@@ -62,6 +63,7 @@ impl KeyBrokerService for KeyBroker {
             launch_id: launch_id.to_string(),
         };
 
+        info!("Launch Bundle Returned");
         Result::Ok(Response::new(reply))
     }
 

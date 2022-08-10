@@ -9,6 +9,7 @@ use codicon::{Decoder, Encoder};
 use sev::launch::sev::{HeaderFlags, Policy};
 use sev::session::{Initialized, Session, Verified};
 use sev::{Build, Version};
+use log::*;
 
 pub fn generate_launch_bundle(
     policy: u32,
@@ -39,6 +40,7 @@ pub fn verify_measurement(
     launch_measurement: String,
     session: Session<Initialized>,
 ) -> Result<Session<Verified>> {
+    info!("Verifying Measurement: {}", launch_measurement);
     let digest = base64::decode(&connection.fw_digest)?;
 
     let build = Build {
